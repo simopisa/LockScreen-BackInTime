@@ -1,0 +1,143 @@
+﻿@page "/"
+
+
+<div class="wrapper">
+    <div class="forbounce @(hasToJump ? " fa-bounce" : "")" @onclick="Bounce" style="--fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0; --fa-animation-iteration-count: 1;">
+        <div class="top">
+            <div class="lock-symbol">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div class="dataora">
+                <div class="ore">
+                    @if (!isGoingBackInTime || hasFinished)
+                    {
+                        @(ORA.ToString("HH:mm"))
+
+                    }
+                    else
+                    {
+                        @(ORA_MODIFICATA.ToString("HH:mm"))
+                    }
+
+                </div>
+                <div class="data">
+
+                    @(DATA.ToString("ddd, d MMM"))
+                </div>
+            </div>
+
+        </div>
+        <div class="middle">
+            <div class="spotify">
+
+                <div class="top-spotify">
+                    <div class="spotify-logo">
+                        <i class="fa-brands fa-spotify"></i><span class="spottitle">Spotify</span>
+                    </div>
+                    <div class="options">
+                        <div class="speaker">
+                            <i class="fa-solid fa-headphones"></i>
+                            <span class="speck">Speaker</span>
+                        </div>
+                        <div class="more-options">
+                            <i class="fa-solid fa-angle-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="middle-spotify">
+                    <div class="album-cover">
+                        <img class="spocover" src="img/spotcover.jpg" />
+                    </div>
+                    <div class="title-artist">
+                        <div class="spo-title">
+                            again&again
+                        </div>
+                        <div class="spo-artist">
+                            Against The Current
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-spotify">
+                    <div class="back">
+                        <i class="fa-solid fa-backward-step"></i>
+                    </div>
+                    <div class="pause">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                    <div class="forward">
+                        <i class="fa-solid fa-forward-step"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="fingerprint">
+            <img src="img/fingerprint.svg" class="fingerprint-img" />
+        </div>
+
+    </div>
+
+    <div class="footer" @onclick="async()=>{await GoBackInTime();}">
+        <div class="camera">
+            <i class="fa-solid fa-camera"></i>
+        </div>
+    </div>
+</div>
+@code {
+    public DateTime ORA { get; set; } = DateTime.Now;
+    public DateTime ORA_MODIFICATA { get; set; }
+    public DateTime DATA { get; set; } = DateTime.Now;
+
+
+    public bool hasToJump { get; set; } = false;
+    public bool isGoingBackInTime { get; set; } = false;
+    public bool hasFinished { get; set; } = false;
+    protected override void OnInitialized()
+    {
+
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (isGoingBackInTime == false)
+        {
+            ORA = DateTime.Now.AddMinutes(10);
+            DATA = DateTime.Now;
+            StateHasChanged();
+        }
+        if (hasFinished)
+        {
+            ORA = DateTime.Now;
+            DATA = DateTime.Now;
+            StateHasChanged();
+        }
+
+
+
+    }
+
+    public async void Bounce()
+    {
+        hasToJump = true;
+        await Task.Delay(500);
+        hasToJump = false;
+    }
+    public async Task GoBackInTime()
+    {
+        await Task.Delay(7000);
+        isGoingBackInTime = true;
+        ORA_MODIFICATA = ORA;
+        StateHasChanged();
+        await Task.Run(async () =>
+        {
+
+            for (int i = 0; i < 10; i++)
+            {
+                ORA_MODIFICATA=ORA_MODIFICATA.AddMinutes(-1);
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(500);
+            }
+        });
+        hasFinished = true;
+    }
+}
